@@ -1,15 +1,48 @@
 const args = process.argv;
 const request = require('request');
+const fs = require('fs');
 
 args.splice(0, 2);
 
-console.log(args);
+
+const outputMessage = (bytes, PATH) => {
+
+  return `Downloaded and saved ${bytes} bytes to ${PATH}`
+};
+
 const fetcher = function(args) {
 
-  request(args[0], (error, response, body) => {
-    console.log('error:', error); // Print the error if one occurred
-    console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    console.log('body:', body); // Print the HTML for the Google homepage.
+  const URL = args[0];
+  const PATH = args[1];
+  
+
+  request(URL, (error, response, body) => {
+    
+    fs.writeFile(PATH, body, (err) => {
+      if (err) {
+        console.log(err);
+      } else {
+        
+        fs.stat(PATH, (err, stats) => {
+          
+          if(err) {
+            console.log(err);
+          } else {
+            // return `Downloaded and saved ${stats.size} bytes to ${PATH}`;
+            return outputMessage(stats.size, PATH);
+
+          }
+        })
+      }
+    });
+
+    
   });
 
+
 }
+
+
+
+
+console.log(fetcher(args));
